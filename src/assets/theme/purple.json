@@ -14,7 +14,11 @@
         "--primary-color": "#8b5cf6",
         "--secondary-color": "#7c3aed",
         "--hover-color": "#ede9fe",
-        "--shadow-color": "rgba(139, 92, 246, 0.1)"
+        "--shadow-color": "rgba(139, 92, 246, 0.1)",
+        "--glass-bg": "rgba(255, 255, 255, 0.7)",
+        "--glass-border": "rgba(139, 92, 246, 0.2)",
+        "--glass-shadow": "0 8px 32px rgba(139, 92, 246, 0.1)",
+        "--glass-backdrop": "blur(10px) saturate(180%)"
       }
     }
   ]

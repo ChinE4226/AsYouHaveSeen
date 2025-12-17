@@ -2,32 +2,43 @@
   <div class="desktop">
     <!-- 系统标题栏 -->
     <div class="desktop-header">
-      <div class="system-title">
+      <div class="system-title glass-button">
         <el-icon :size="24" color="#409EFF">
           <Monitor />
         </el-icon>
         <span class="title-text">As you've seen</span>
       </div>
-      <div class="user-info">
-        <el-avatar
-          :size="32"
-          src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
-        />
-        <span class="username">Manager</span>
-        <el-dropdown>
-          <el-button type="text">
-            <el-icon><ArrowDown /></el-icon>
+      <div class="header-actions">
+        <!-- 功能按钮组 -->
+        <div class="button-container">
+          <el-button type="text" @click="showThemeDialog = true" class="glass-button">
+            <el-icon><Brush /></el-icon>
           </el-button>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="openProfile">Profile</el-dropdown-item>
-              <el-dropdown-item divided>Log out</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-        <el-button type="text" @click="openSettings">
-          <el-icon><Setting /></el-icon>
-        </el-button>
+          <el-button type="text" @click="openSettings" class="glass-button">
+            <el-icon><Setting /></el-icon>
+          </el-button>
+        </div>
+        <!-- 用户按钮组 -->
+        <div class="button-container">
+          <div class="glass-button user-info-button">
+            <el-avatar
+              :size="24"
+              src="https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
+            />
+            <span class="username">Manager</span>
+          </div>
+          <el-dropdown>
+            <el-button type="text" class="glass-button">
+              <el-icon><ArrowDown /></el-icon>
+            </el-button>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="openProfile">Profile</el-dropdown-item>
+                <el-dropdown-item divided>Log out</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
       </div>
     </div>
 
@@ -304,15 +315,55 @@
       </div>
       <el-row :gutter="16"> </el-row>
     </section>
+
+    <!-- 主题选择对话框 -->
+    <el-dialog
+      v-model="showThemeDialog"
+      title="Select Theme"
+      width="400px"
+      :close-on-click-modal="false"
+    >
+      <div class="theme-list">
+        <div
+          v-for="theme in availableThemes"
+          :key="theme.id"
+          class="theme-item"
+          :class="{ active: currentThemeId === theme.id }"
+          :data-theme="theme.id"
+          @click="switchTheme(theme.id)"
+        >
+          <div class="theme-preview" :style="getThemePreviewStyle(theme)">
+            <div class="preview-header"></div>
+            <div class="preview-content"></div>
+          </div>
+          <div class="theme-info">
+            <h4>{{ theme.name }}</h4>
+            <p>{{ theme.description }}</p>
+          </div>
+          <el-icon v-if="currentThemeId === theme.id" class="active-icon">
+            <Check />
+          </el-icon>
+        </div>
+      </div>
+
+      <template #footer>
+        <span class="dialog-footer">
+          <el-button @click="showThemeDialog = false"> Cancel </el-button>
+          <el-button type="primary" @click="showThemeDialog = false"> Confirm </el-button>
+        </span>
+      </template>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { ref, onMounted, reactive } from 'vue'
+import { ref, onMounted, reactive, computed } from 'vue'
 import { useRouter } from 'vue-router'
 import defaultProjectsData from '../assets/data/projects.json'
 import defaultToolsData from '../assets/data/tools.json'
 import recommendationsData from '../assets/data/recommendations.json'
+import { Edit, Close, Plus, Brush, Check } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 // 创建响应式数据存储
 const projectsData = reactive({
@@ -321,8 +372,6 @@ const projectsData = reactive({
 const toolsData = reactive({
   tools: [...defaultToolsData.tools],
 })
-import { Edit, Close, Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
 
 export default {
   name: 'DesktopMain',
@@ -334,6 +383,9 @@ export default {
     const dialogVisible = ref(false)
     const toolDialogVisible = ref(false)
     const recommendations = ref([])
+    const showThemeDialog = ref(false)
+    const currentThemeId = ref('light')
+    const availableThemes = ref([])
     const editingProject = ref({
       name: '',
       description: '',
@@ -349,11 +401,80 @@ export default {
       url: '',
     })
 
+    // 获取当前主题
+    const currentTheme = computed(() => {
+      return availableThemes.value.find((theme) => theme.id === currentThemeId.value)
+    })
+
+    // 动态导入主题文件
+    const loadThemes = async () => {
+      try {
+        const themeModules = import.meta.glob('@/assets/theme/*.json')
+        const themes = []
+
+        for (const path in themeModules) {
+          const module = await themeModules[path]()
+          if (module.default && module.default.themes) {
+            themes.push(...module.default.themes)
+          }
+        }
+
+        availableThemes.value = themes
+      } catch (error) {
+        console.error('Error loading themes:', error)
+        ElMessage.error('Failed to load themes')
+      }
+    }
+
+    // 切换主题
+    const switchTheme = (themeId, showMessage = true) => {
+      const theme = availableThemes.value.find((t) => t.id === themeId)
+      if (!theme) return
+
+      currentThemeId.value = themeId
+
+      // 应用CSS变量
+      const root = document.documentElement
+      Object.entries(theme.variables).forEach(([key, value]) => {
+        root.style.setProperty(key, value)
+      })
+
+      // 保存到本地存储
+      localStorage.setItem('selectedTheme', themeId)
+
+      // 只在用户主动切换时显示提示
+      if (showMessage) {
+        ElMessage.success(`Switched to ${theme.name}`)
+      }
+    }
+
+    // 获取主题预览样式
+    const getThemePreviewStyle = (theme) => {
+      return {
+        '--preview-bg-left': theme.variables['--background-left-color'],
+        '--preview-bg-right': theme.variables['--background-right-color'],
+        '--preview-header': theme.variables['--header-color'],
+        '--preview-text': theme.variables['--text-color'],
+      }
+    }
+
+    // 初始化主题
+    const initTheme = () => {
+      const savedTheme = localStorage.getItem('selectedTheme')
+      if (savedTheme && availableThemes.value.find((t) => t.id === savedTheme)) {
+        switchTheme(savedTheme, false)
+      } else {
+        switchTheme('light', false)
+      }
+    }
+
     // 加载项目数据
-    onMounted(() => {
+    onMounted(async () => {
       systemApps.value = [...projectsData.projects]
       commonTools.value = [...toolsData.tools]
       recommendations.value = [...recommendationsData.recommendations]
+      await loadThemes()
+      initTheme()
     })
 
     // 保存到JSON文件
@@ -665,6 +786,14 @@ export default {
       Edit,
       Close,
       Plus,
+      Brush,
+      Check,
+      showThemeDialog,
+      currentThemeId,
+      availableThemes,
+      currentTheme,
+      switchTheme,
+      getThemePreviewStyle,
     }
   },
 }
@@ -686,9 +815,7 @@ export default {
 }
 
 .desktop-header {
-  background: var(--header-color);
-  padding: 16px 24px;
-  box-shadow: 0 2px 8px var(--shadow-color);
+  padding: 12px 24px;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -706,21 +833,61 @@ export default {
   gap: 12px;
 }
 
+.system-title.glass-button {
+  width: auto;
+  height: 40px;
+  padding: 0 16px;
+}
+
 .title-text {
   font-size: 20px;
   font-weight: bold;
   color: var(--text-color);
 }
 
-.user-info {
+.header-actions {
   display: flex;
   align-items: center;
   gap: 12px;
 }
 
-.username {
-  font-weight: 500;
-  color: var(--secondary-color);
+.button-container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.glass-button {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.6) !important;
+  backdrop-filter: blur(10px) saturate(180%);
+  border: 1px solid rgba(255, 255, 255, 0.3) !important;
+  transition: all 0.3s ease;
+  color: var(--text-color);
+}
+
+.glass-button:hover {
+  background: rgba(255, 255, 255, 0.8) !important;
+  border-color: rgba(255, 255, 255, 0.5) !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.user-info-button {
+  padding: 0 12px !important;
+  width: auto;
+  gap: 8px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
 }
 
 .apps-section,
@@ -730,10 +897,11 @@ export default {
 .timeline-section {
   margin: 80px 24px 32px;
   padding: 20px;
-  background: var(--header-color);
-  border-radius: 8px;
-  box-shadow: 0 2px 12px var(--shadow-color);
-  border: 1px solid var(--border-color);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  border-radius: 18px;
+  box-shadow: var(--glass-shadow);
+  border: 1px solid var(--glass-border);
 }
 
 .section-header {
@@ -791,7 +959,7 @@ export default {
 .tool-icon {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -837,7 +1005,9 @@ export default {
   width: 24px;
   height: 24px;
   border-radius: 12px;
-  background-color: rgba(0, 0, 0, 0.1);
+  background: rgba(255, 255, 255, 0.5);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -851,11 +1021,13 @@ export default {
 }
 
 .add-card {
-  border: 2px dashed var(--border-color);
+  border: 2px dashed var(--glass-border);
   display: flex;
   align-items: center;
   justify-content: center;
-  background-color: transparent;
+  background: rgba(255, 255, 255, 0.3);
+  backdrop-filter: var(--glass-backdrop);
+  border-radius: 24px;
 }
 
 .add-card:hover {
@@ -1002,9 +1174,10 @@ export default {
 .tool-card,
 .project-card,
 .recommendation-card {
-  background: var(--header-color);
-  border: 1px solid var(--border-color);
-  border-radius: 8px;
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-backdrop);
+  border: 1px solid var(--glass-border);
+  border-radius: 18px;
   cursor: pointer;
   transition: all 0.3s ease;
   height: 100px;
@@ -1020,14 +1193,15 @@ export default {
 .project-card:hover,
 .recommendation-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 25px var(--shadow-color);
-  background-color: var(--hover-color);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+  background: rgba(255, 255, 255, 0.8);
+  border-color: rgba(255, 255, 255, 0.5);
 }
 
 .card-icon {
   width: 48px;
   height: 48px;
-  border-radius: 8px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1074,5 +1248,85 @@ export default {
 .no-recommendations {
   text-align: center;
   padding: 40px 20px;
+}
+
+/* 主题相关样式 */
+.theme-list {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+.theme-item {
+  padding: 12px;
+  border: 2px solid var(--border-color);
+  border-radius: 16px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.theme-item:hover {
+  border-color: var(--primary-color);
+  transform: translateY(-2px);
+}
+
+.theme-item.active {
+  border-color: var(--primary-color);
+  background: rgba(64, 158, 255, 0.1);
+}
+
+.theme-preview {
+  width: 100%;
+  height: 100px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--preview-bg-left), var(--preview-bg-right));
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.preview-header {
+  height: 30%;
+  background: var(--preview-header);
+}
+
+.preview-content {
+  height: 70%;
+  background: var(--preview-bg-right);
+}
+
+.theme-info {
+  padding: 0 4px;
+}
+
+.theme-info h4 {
+  margin: 4px 0 2px;
+  font-size: 14px;
+  color: var(--text-color);
+  font-weight: 600;
+}
+
+.theme-info p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--secondary-color);
+}
+
+.active-icon {
+  color: var(--primary-color);
+  font-size: 18px;
+  align-self: flex-end;
+  margin-top: -8px;
+}
+
+.dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
 }
 </style>

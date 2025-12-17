@@ -9,8 +9,14 @@
   --hover-color: #f8f9fa;
   --shadow-color: rgba(0, 0, 0, 0.1);
 
+  /* Liquid Glass 变量 */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(255, 255, 255, 0.3);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+  --glass-backdrop: blur(10px) saturate(180%);
+
   /* 其他常用变量 */
-  --border-radius: 8px;
+  --border-radius: 24px;
   --transition: all 0.2s ease;
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }
