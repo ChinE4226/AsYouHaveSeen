@@ -16,7 +16,9 @@
   --glass-backdrop: blur(10px) saturate(180%);
 
   /* 其他常用变量 */
-  --border-radius: 24px;
+  --radius-large: 28px;
+  --radius-pill: 999px;
+  --border-radius: var(--radius-large);
   --transition: all 0.2s ease;
   --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
 }

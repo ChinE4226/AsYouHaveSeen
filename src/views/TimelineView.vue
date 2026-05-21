@@ -9,10 +9,14 @@
         <span class="title-text">As you've seen</span>
       </div>
       <div class="header-actions">
-        <!-- 返回按钮组 -->
+        <!-- 功能按钮组 -->
         <div class="button-container">
+          <ThemeSwitcher :fixed="false" button-type="text" :button-circle="false" button-class="glass-button" :use-theme-color="false" />
           <el-button type="text" @click="goHome" class="glass-button">
             <el-icon><House /></el-icon>
+          </el-button>
+          <el-button type="text" @click="openSettings" class="glass-button">
+            <el-icon><Setting /></el-icon>
           </el-button>
         </div>
         <!-- 用户按钮组 -->
@@ -39,33 +43,39 @@
       </div>
     </div>
 
-    <el-card class="timeline-card">
-      <el-timeline>
-        <el-timeline-item
-          v-for="(item, index) in items"
-          :key="index"
-          :timestamp="item.time"
-          :type="item.type"
-          :hollow="item.hollow"
-          :color="item.color"
-        >
-          <div class="timeline-item">
-            <div class="item-title">{{ item.title }}</div>
-            <div class="item-desc">{{ item.description }}</div>
-          </div>
-        </el-timeline-item>
-      </el-timeline>
-    </el-card>
+    <div class="content-container">
+      <el-card class="timeline-card">
+        <el-timeline>
+          <el-timeline-item
+            v-for="(item, index) in items"
+            :key="index"
+            :timestamp="item.time"
+            :type="item.type"
+            :hollow="item.hollow"
+            :color="item.color"
+          >
+            <div class="timeline-item">
+              <div class="item-title">{{ item.title }}</div>
+              <div class="item-desc">{{ item.description }}</div>
+            </div>
+          </el-timeline-item>
+        </el-timeline>
+      </el-card>
+    </div>
   </div>
 </template>
 
 <script>
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { House, ArrowDown } from '@element-plus/icons-vue'
+import { House, ArrowDown, Setting } from '@element-plus/icons-vue'
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 
 export default {
   name: 'TimelineView',
+  components: {
+    ThemeSwitcher,
+  },
   setup() {
     const router = useRouter()
 
@@ -77,6 +87,10 @@ export default {
     // 打开个人资料
     const openProfile = () => {
       router.push('/profile')
+    }
+
+    const openSettings = () => {
+      router.push('/settings')
     }
 
     const items = ref([
@@ -115,121 +129,13 @@ export default {
       items,
       goHome,
       openProfile,
+      openSettings,
     }
   },
 }
 </script>
 
 <style scoped>
-.timeline-view {
-  min-height: 100vh;
-  padding: 24px;
-  background: linear-gradient(135deg, var(--background-left-color), var(--background-right-color));
-}
-
-.desktop-header {
-  padding: 12px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-.system-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.system-title.glass-button {
-  width: auto;
-  height: 40px;
-  padding: 0 16px;
-}
-
-.title-text {
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.button-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.glass-button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.6) !important;
-  backdrop-filter: blur(10px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  transition: all 0.3s ease;
-  color: var(--text-color);
-}
-
-.glass-button:hover {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.user-info-button {
-  padding: 0 12px !important;
-  width: auto;
-  gap: 8px;
-}
-
-.username {
-  font-weight: 500;
-  color: var(--text-color);
-  font-size: 13px;
-  white-space: nowrap;
-}
-  right: 0;
-  z-index: 1000;
-}
-
-.system-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.title-text {
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.username {
-  font-weight: 500;
-  color: var(--secondary-color);
-}
-
 .header {
   display: flex;
   align-items: center;
@@ -243,12 +149,6 @@ export default {
   gap: 8px;
   margin: 0;
   color: var(--text-color);
-}
-
-.timeline-card {
-  background: var(--header-color);
-  border: 1px solid var(--border-color);
-  margin-top: 80px;
 }
 
 .timeline-item .item-title {

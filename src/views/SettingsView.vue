@@ -9,8 +9,9 @@
         <span class="title-text">As you've seen</span>
       </div>
       <div class="header-actions">
-        <!-- 返回按钮组 -->
+        <!-- 功能按钮组 -->
         <div class="button-container">
+          <ThemeSwitcher :fixed="false" button-type="text" :button-circle="false" button-class="glass-button" :use-theme-color="false" />
           <el-button type="text" @click="goHome" class="glass-button">
             <el-icon><House /></el-icon>
           </el-button>
@@ -191,8 +192,9 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { House, ArrowDown } from '@element-plus/icons-vue'
+import { House, ArrowDown, Setting } from '@element-plus/icons-vue'
 import settingsData from '@/assets/setting/setting.json'
+import ThemeSwitcher from '@/components/ThemeSwitcher.vue'
 
 const router = useRouter()
 const activeMenu = ref('appearance')
@@ -349,6 +351,10 @@ const openProfile = () => {
   router.push('/profile')
 }
 
+const openSettings = () => {
+  router.push('/settings')
+}
+
 // 返回主页
 const goHome = () => {
   router.push('/')
@@ -361,94 +367,9 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.settings {
-  min-height: 100vh;
-  width: 100vw;
-  background: linear-gradient(135deg, var(--background-left-color), var(--background-right-color));
-  padding: 0;
-  overflow-y: auto;
-}
-
-.desktop-header {
-  padding: 12px 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 1000;
-}
-
-.system-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.system-title.glass-button {
-  width: auto;
-  height: 40px;
-  padding: 0 16px;
-}
-
-.title-text {
-  font-size: 20px;
-  font-weight: bold;
-  color: var(--text-color);
-}
-
-.header-actions {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.button-container {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.glass-button {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: rgba(255, 255, 255, 0.6) !important;
-  backdrop-filter: blur(10px) saturate(180%);
-  border: 1px solid rgba(255, 255, 255, 0.3) !important;
-  transition: all 0.3s ease;
-  color: var(--text-color);
-}
-
-.glass-button:hover {
-  background: rgba(255, 255, 255, 0.8) !important;
-  border-color: rgba(255, 255, 255, 0.5) !important;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-.user-info-button {
-  padding: 0 12px !important;
-  width: auto;
-  gap: 8px;
-}
-
-.username {
-  font-weight: 500;
-  color: var(--text-color);
-  font-size: 13px;
-  white-space: nowrap;
-}
-
 .settings-container {
   display: flex;
-  margin: 80px 24px 32px;
+  margin: 80px 24px 24px;
   gap: 24px;
   min-height: calc(100vh - 120px);
 }
@@ -457,7 +378,7 @@ onMounted(() => {
 .sidebar {
   width: 250px;
   background: var(--header-color);
-  border-radius: 8px;
+  border-radius: var(--radius-large);
   box-shadow: 0 2px 12px var(--shadow-color);
   border: 1px solid var(--border-color);
   flex-shrink: 0;
@@ -511,7 +432,7 @@ onMounted(() => {
 .main-content {
   flex: 1;
   background: var(--header-color);
-  border-radius: 8px;
+  border-radius: var(--radius-large);
   box-shadow: 0 2px 12px var(--shadow-color);
   border: 1px solid var(--border-color);
   padding: 24px;
@@ -538,9 +459,8 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
-.settings-card {
-  background: var(--header-color);
-  border: 1px solid var(--border-color);
+.content-section:last-child {
+  margin-bottom: 0;
 }
 
 .setting-item {

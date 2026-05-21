@@ -36,6 +36,12 @@ body {
   --secondary-color: #6c757d;
   --hover-color: #f8f9fa;
   --shadow-color: rgba(0, 0, 0, 0.1);
+  --radius-large: 28px;
+  --radius-pill: 999px;
+  --glass-bg: color-mix(in srgb, var(--header-color) 75%, transparent);
+  --glass-border: color-mix(in srgb, var(--header-color) 45%, transparent);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  --glass-backdrop: blur(10px) saturate(180%);
 }
 
 /* 默认文本颜色跟随主题变量 */
@@ -50,6 +56,7 @@ body,
   background-color: var(--header-color) !important;
   border-color: var(--border-color) !important;
   color: var(--text-color) !important;
+  border-radius: var(--radius-large) !important;
 }
 
 .el-card__header {
@@ -63,6 +70,7 @@ body,
   border-color: var(--border-color) !important;
   background-color: var(--header-color) !important;
   color: var(--text-color) !important;
+  border-radius: var(--radius-large) !important;
 }
 
 .el-button--text {
@@ -74,6 +82,10 @@ body,
 .el-button--text:hover {
   color: var(--primary-color) !important;
   background-color: var(--hover-color) !important;
+}
+
+.desktop-header .el-button {
+  border-radius: var(--radius-pill) !important;
 }
 
 .el-button--primary {
@@ -193,23 +205,29 @@ body,
 
 /* 下拉菜单样式 */
 .el-dropdown-menu {
-  background-color: var(--header-color) !important;
-  border-color: var(--border-color) !important;
-  box-shadow: 0 2px 12px var(--shadow-color) !important;
+  background: var(--glass-bg) !important;
+  border: 1px solid var(--glass-border) !important;
+  box-shadow: var(--glass-shadow) !important;
+  backdrop-filter: var(--glass-backdrop);
+  border-radius: var(--radius-large) !important;
+  padding: 6px !important;
 }
 
 .el-dropdown-menu__item {
   color: var(--text-color) !important;
-  background-color: var(--header-color) !important;
+  background-color: transparent !important;
+  border-radius: 12px;
 }
 
 .el-dropdown-menu__item:hover {
-  background-color: var(--hover-color) !important;
+  background-color: rgba(255, 255, 255, 0.35) !important;
   color: var(--primary-color) !important;
 }
 
 .el-dropdown-menu__item--divided {
-  border-top-color: var(--border-color) !important;
+  border-top-color: var(--glass-border) !important;
+  margin-top: 6px;
+  padding-top: 6px;
 }
 
 /* 标签样式 */

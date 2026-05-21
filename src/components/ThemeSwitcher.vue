@@ -1,11 +1,12 @@
 <template>
-  <div class="theme-switcher">
+  <div class="theme-switcher" :class="{ inline: !fixed }">
     <el-button
       class="theme-toggle-button"
-      type="primary"
-      circle
+      :class="buttonClass"
+      :type="buttonType"
+      :circle="buttonCircle"
       @click="showThemeDialog = true"
-      :style="{ backgroundColor: currentTheme?.primaryColor || '#409EFF' }"
+      :style="buttonStyle"
     >
       <el-icon :size="20">
         <Brush />
@@ -57,6 +58,29 @@ import { ref, onMounted, computed } from 'vue'
 import { Brush, Check } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 
+const props = defineProps({
+  fixed: {
+    type: Boolean,
+    default: true,
+  },
+  buttonType: {
+    type: String,
+    default: 'primary',
+  },
+  buttonCircle: {
+    type: Boolean,
+    default: true,
+  },
+  buttonClass: {
+    type: String,
+    default: '',
+  },
+  useThemeColor: {
+    type: Boolean,
+    default: true,
+  },
+})
+
 const showThemeDialog = ref(false)
 const currentThemeId = ref('light')
 const availableThemes = ref([])
@@ -64,6 +88,16 @@ const availableThemes = ref([])
 // 获取当前主题
 const currentTheme = computed(() => {
   return availableThemes.value.find((theme) => theme.id === currentThemeId.value)
+})
+
+const buttonStyle = computed(() => {
+  if (!props.useThemeColor) {
+    return {}
+  }
+
+  return {
+    backgroundColor: currentTheme.value?.primaryColor || '#409EFF',
+  }
 })
 
 // 动态导入主题文件
@@ -143,6 +177,12 @@ onMounted(async () => {
   z-index: 1000;
 }
 
+.theme-switcher.inline {
+  position: static;
+  bottom: auto;
+  right: auto;
+}
+
 .theme-toggle-button {
   width: 32px;
   height: 32px;
@@ -153,6 +193,17 @@ onMounted(async () => {
 .theme-toggle-button:hover {
   transform: scale(1.1);
   box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.theme-switcher.inline .theme-toggle-button {
+  width: 40px;
+  height: 40px;
+  box-shadow: none;
+}
+
+.theme-switcher.inline .theme-toggle-button:hover {
+  transform: none;
+  box-shadow: none;
 }
 
 .theme-list {
@@ -166,7 +217,7 @@ onMounted(async () => {
   padding: 12px;
   margin-bottom: 8px;
   border: 2px solid transparent;
-  border-radius: 8px;
+  border-radius: var(--radius-large);
   cursor: pointer;
   transition: all 0.3s ease;
   position: relative;
@@ -200,7 +251,7 @@ onMounted(async () => {
 .theme-preview {
   width: 60px;
   height: 40px;
-  border-radius: 6px;
+  border-radius: var(--radius-large);
   margin-right: 12px;
   overflow: hidden;
   position: relative;
